@@ -13,11 +13,62 @@
     line-height: 1.6;
   }
   a { color: inherit; }
+  @media print {
+    .sidebar { display:none !important; }
+    details > div { display:block !important; }
+    summary { display:none !important; }
+    body { background:#fff; }
+    .dl-btn { display:none !important; }
+  }
   @media (max-width:700px) {
     .main-grid { flex-direction:column !important; }
     .sidebar { width:100% !important; position:static !important; }
   }
 </style>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  window.addEventListener('beforeprint', function() {
+    document.querySelectorAll('details').forEach(function(d) { d.open = true; });
+  });
+  document.querySelectorAll('details > div').forEach(function(div) {
+    var parts = div.innerHTML.split('<br>');
+    var html = ''; var i = 0;
+    while (i < parts.length) {
+      var line = parts[i].trim();
+      if (!line) { i++; continue; }
+      var bRe = /^[-·•①②③④⑤⑥⑦⑧⑨]\s/;
+      if (bRe.test(line)) {
+        html += '<ul style="margin:0 0 10px 20px;padding:0">';
+        while (i < parts.length && parts[i].trim() && bRe.test(parts[i].trim())) {
+          html += '<li style="margin-bottom:5px">' + parts[i].trim().replace(/^[-·•①②③④⑤⑥⑦⑧⑨]\s*/, '') + '</li>';
+          i++;
+        }
+        html += '</ul>';
+      } else {
+        var ni = i + 1;
+        while (ni < parts.length && !parts[ni].trim()) ni++;
+        var nb = ni < parts.length && bRe.test(parts[ni].trim());
+        html += nb
+          ? '<p style="margin:0 0 4px;font-weight:600">' + line + '</p>'
+          : '<p style="margin:0 0 10px">' + line + '</p>';
+        i++;
+      }
+    }
+    div.innerHTML = html;
+  });
+});
+
+function printArticle(id) {
+  var allArticles = document.querySelectorAll('[id^="article-"]');
+  var sidebar = document.querySelector('.sidebar');
+  allArticles.forEach(function(a) { if (a.id !== id) a.style.display = 'none'; });
+  if (sidebar) sidebar.style.display = 'none';
+  document.getElementById(id).querySelectorAll('details').forEach(function(d) { d.open = true; });
+  window.print();
+  allArticles.forEach(function(a) { a.style.display = ''; });
+  if (sidebar) sidebar.style.display = '';
+}
+</script>
 </head>
 <body>
 
@@ -39,9 +90,16 @@
     <h1 style="font-size:2rem;font-weight:800;margin-bottom:8px;">
         [주간정책동향] SRI Weekly 제147호
     </h1>
-    <div style="font-size:1rem;opacity:0.9;margin-bottom:20px;">
+    <div style="font-size:1rem;opacity:0.9;margin-bottom:16px;">
         2026.4.30 | 수원시정연구원
     </div>
+    <button class="dl-btn"
+            onclick="document.querySelectorAll('details').forEach(d=>d.open=true);window.print();"
+            style="margin-top:4px;padding:9px 24px;background:rgba(255,255,255,0.18);color:#fff;
+                   border:1.5px solid rgba(255,255,255,0.7);border-radius:6px;font-size:0.88rem;
+                   font-weight:600;cursor:pointer;letter-spacing:0.03em;"
+            onmouseover="this.style.background='rgba(255,255,255,0.35)'"
+            onmouseout="this.style.background='rgba(255,255,255,0.18)'">다운로드</button>
 </div>
 
 <!-- ── Main layout ──────────────────────────────────────────── -->
@@ -172,13 +230,21 @@
         box-shadow:0 2px 8px rgba(59,109,17,0.06);
     ">
         <!-- Header -->
-        <div style="margin-bottom:16px;">
-            <div style="font-size:0.72rem;color:#777777;font-weight:600;
-                        letter-spacing:0.05em;margin-bottom:4px;">
-                WEEKLY 1
+        <div style="margin-bottom:16px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+            <div>
+                <div style="font-size:0.72rem;color:#777777;font-weight:600;
+                            letter-spacing:0.05em;margin-bottom:4px;">
+                    WEEKLY 1
+                </div>
+                <h2 style="margin:0;font-size:1.15rem;font-weight:700;
+                           color:#2a5009;line-height:1.4;">수원, 중립형 반도체 &#x27;R&amp;D&#x27; 허브 구축 방향</h2>
             </div>
-            <h2 style="margin:0;font-size:1.15rem;font-weight:700;
-                       color:#2a5009;line-height:1.4;">수원, 중립형 반도체 &#x27;R&amp;D&#x27; 허브 구축 방향</h2>
+            <button onclick="printArticle('article-1')"
+                    style="flex-shrink:0;padding:6px 14px;background:#3B6D11;color:#fff;
+                           border:none;border-radius:6px;font-size:0.78rem;font-weight:600;
+                           cursor:pointer;white-space:nowrap;"
+                    onmouseover="this.style.background='#2a5009'"
+                    onmouseout="this.style.background='#3B6D11'">다운로드</button>
         </div>
 
         <!-- Keywords -->
@@ -215,7 +281,7 @@
                 background:#f9fdf4;
                 border-radius:8px;
                 border:1px solid #d0e4b8;
-            ">반도체 경쟁은 생산량 경쟁에서 &#x27;기술주권 확보 경쟁&#x27;으로 전환<br><br>반도체는 단순 제조업을 넘어 국가 안보와 산업주권을 좌우하는 핵심 전략기술로 부상. 코로나·미중 갈등 이후 반도체 공급망 교란 심화, 주요국은 자국 중심 기술 내재화와 공급망 재편 추진 중.<br><br>미국(NSTC·7조원), 일본(LSTC·3조원), 벨기에(IMEC·4조원) 등 글로벌 주요국이 &#x27;중립형 R&amp;D 플랫폼&#x27;을 통해 경쟁력 강화 중.<br><br>한국은 메모리 제조공정 강점에도 반도체 장비 국산화율 18%에 불과, 소부장·독립 검증 인프라 보완 시급.<br><br>경기 남부 반도체 클러스터는 성장 중이나 대기업 종속성과 폐쇄성이 한계. 용인·화성·평택의 제조거점은 특정 대기업 중심으로 운영되어 소부장 기업은 독립적 시험·검증 공간 없이 해외 검증 의존 반복.<br><br>수원은 성균관대·아주대·경기대 등 반도체 R&amp;D 역량, 광교테크노밸리, 한국나노기술원·차세대융합기술원 등 첨단기술 연구기반 보유. 수원형 ASTC는 공동연구-검증-인력양성 3대 기능 중심으로 설계 필요.</div>
+            ">반도체 경쟁은 생산량 경쟁에서 '기술주권 확보 경쟁'으로 전환<br><br>반도체는 단순 제조업을 넘어 국가 안보와 산업주권을 좌우하는 핵심 전략기술로 부상<br>- 코로나19·미중 갈등 이후 반도체 공급망 교란 심화, 주요국은 자국 중심 기술 내재화와 공급망 재편 추진 중<br>- 경쟁의 중심 역시 생산량 확대에서 AI 첨단공정, 반도체 고대역폭메모리(HBM), 파운드리, 소부장 양산검증 등 고부가 기술 영역으로 이동<br><br>미국·중국·일본은 대규모 재정 투입과 연구 거점 구축을 통해 반도체 기술주권 확보에 집중<br>① 미국(반도체 제조 복귀·공급망 재편): Chips Act 527억 달러 투자, 민간 6,000억 달러 이상 유도. 삼성·TSMC 등 글로벌 파운드리 기업 자국 유치. 동맹국(한국·일본·대만) 중심 공급망 재구축<br>② 중국(자급화·기술독립): Big Fund III 등 1,400~1,500억 달러 직접 투자. 미국 제재(첨단 반도체 기술·장비 수출 금지 등)에 대응하여 설계·장비·소재 내재화 지속 추진. 반도체 생산 자급률 확대<br>③ 일본(첨단공정 복원): 차세대 반도체 단기 생산체계 구축을 위한 개방형 연구개발 거점(LSTC) 및 제조 거점(Rapidus) 구축. TSMC 구마모토 공장 유치<br><br>한국은 메모리 제조공정 강점에도 소부장·R&amp;D 검증체계 보완 시급<br>- 한국 반도체 장비 국산화율은 약 18% 수준에 불과<br>- 첨단공정이 미세화될수록 단순 제조역량보다 설계–검증–양산 연계체계 확보가 중요<br><br>경기 남부 반도체 클러스터: 성장 중이나 대기업 종속성과 폐쇄성이 한계<br>- 용인·화성·기흥: 반도체 메가클러스터 조성, 미니팹, 소부장 제조<br>- 평택·안성: 메모리·파운드리 중심 제조거점, 소부장 특화단지<br>- 판교: 팹리스 설계 중심<br>- 제조거점은 특정 대기업 중심으로 운영되어 폐쇄성이 높고, 소부장 기업은 독립적인 시험·검증 공간 없이 해외 검증 의존 반복 → 기술 유출 위험, 일정 지연, 양산 전환 비용 누적<br><br>글로벌 중립형 R&amp;D 플랫폼 비교<br>① 벨기에 IMEC (1984년 설립, 약 4조원, 루벤): 세계 최고 수준 비영리 종합 반도체 연구소. 삼성전자·TSMC·Intel·ASML 등 경쟁 관계의 글로벌 기업이 공동 참여. 초미세공정·차세대 원천기술·테스트베드·인력양성 기능 수행<br>② 미국 NSTC (2024년 설립, 약 7조원, 캘리포니아 서니베일): 반도체 제조·설계 R&amp;D 리더십 탈환 목표 민관 협력 플랫폼. 소부장과 학계가 IP 분쟁 없이 공동연구 할 수 있는 기관. 칩 설계·보안·EDA 등 첨단 반도체 R&amp;D와 투자·인력양성 연계. 연구 성과를 제조 단계로 연결하는 시제품 제작·실증 테스트베드 제공<br>③ 일본 LSTC (2022년 설립, 약 3조원, 도쿄 치요다구): 일본의 차세대 반도체 기술개발 컨소시엄. 경제산업성 주도로 설립. 2nm 이하 차세대 공정 기술 확보 및 기술 로드맵 수립. Rapidus·IMEC·NSTC 등 해외 반도체 선도 거점과의 국제 공동연구 창구 역할. 일본 소재·부품·장비 강점을 결집한 첨단 반도체 생태계 재건<br><br>수원형 ASTC(중립형 R&amp;D 허브)로의 포지셔닝<br>- 산업통상자원부는 2023~2024년 한국첨단반도체기술센터(ASTC) 설립을 추진하였으나, 트럼프 행정부 시기 미국의 불확실성이 커지면서 자금 투입 결정이 지연되어 프로젝트 중단<br>- '중립지대 R&amp;D'를 통한 원천기술 연구 수요는 현재도 매우 필요한 상황<br>- 수원의 강점: 성균관대·아주대·경기대 등 반도체 R&amp;D 역량과 인재, 용인·화성 등 반도체 클러스터 중심에 입지, 광교테크노밸리 인접으로 ASTC 유치에 유리한 조건<br><br>수원형 ASTC — '공동연구-검증-인력양성' 3대 기능 중심 설계<br>① 팹리스·파운드리·소부장 기업이 지식재산권 충돌 없이 협력할 수 있는 공동연구 생태계 조성. 특정 대기업에 종속되지 않는 중립형 R&amp;D 공간 마련. 기업 간 기술 노출 부담을 낮추고 공동연구 참여 유인 확대. 용인·평택·안성 등 제조거점의 기술 병목 해소 지원<br>② 직접 제조가 아닌 제조를 위한 검증 공간 구축. 소부장 원천기술 개발을 위한 테스트베드 구축. 양산 이전 단계의 성능평가·신뢰성 검증·공정 적합성 검토 지원. 해외 검증 의존도와 기술 유출 위험 완화<br>③ NSTC·LSTC 같은 중립형 연구 플랫폼과 연계한 전문인력 양성 기능 확보. 대학·연구기관·기업이 참여하는 실증형 교육체계 마련. 첨단공정·장비·소재·설계검증 분야의 실무형 인력 양성. 경기 남부 반도체 클러스터 전체의 인력 수급 기반 강화<br><br>수원의 입지 경쟁력<br>- 삼성전자 본사 입지 도시로 반도체 R&amp;D 허브 조성의 상징성과 연계 가능성 보유<br>- 성균관대·아주대·경희대 등 우수 공과대학 인적자원 활용 가능<br>- 한국나노기술원·차세대융합기술원 등 광교테크노밸리 내 첨단기술 연구기반 보유<br>- 2025년 기준 1,114개의 연구소 및 기업 내 연구전담부서 입지 (한국산업기술진흥협회, 2025)<br>- 서울의 연구·투자·정책 네트워크와 연계 가능, 용인·화성·평택·안성 등 제조·소부장 거점과 접근성 우수<br><br>참고자료: 수원시정연구원 특강 '글로벌 반도체 산업 동향과 수원의 전략' 발제자료 (김유빈, 2026.4.22.)</div>
         </details>
 
         
@@ -284,13 +350,21 @@
         box-shadow:0 2px 8px rgba(59,109,17,0.06);
     ">
         <!-- Header -->
-        <div style="margin-bottom:16px;">
-            <div style="font-size:0.72rem;color:#777777;font-weight:600;
-                        letter-spacing:0.05em;margin-bottom:4px;">
-                WEEKLY 2
+        <div style="margin-bottom:16px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+            <div>
+                <div style="font-size:0.72rem;color:#777777;font-weight:600;
+                            letter-spacing:0.05em;margin-bottom:4px;">
+                    WEEKLY 2
+                </div>
+                <h2 style="margin:0;font-size:1.15rem;font-weight:700;
+                           color:#2a5009;line-height:1.4;">사회연대경제 혁신모델 확산과 시사점</h2>
             </div>
-            <h2 style="margin:0;font-size:1.15rem;font-weight:700;
-                       color:#2a5009;line-height:1.4;">사회연대경제 혁신모델 확산과 시사점</h2>
+            <button onclick="printArticle('article-2')"
+                    style="flex-shrink:0;padding:6px 14px;background:#3B6D11;color:#fff;
+                           border:none;border-radius:6px;font-size:0.78rem;font-weight:600;
+                           cursor:pointer;white-space:nowrap;"
+                    onmouseover="this.style.background='#2a5009'"
+                    onmouseout="this.style.background='#3B6D11'">다운로드</button>
         </div>
 
         <!-- Keywords -->
@@ -327,7 +401,7 @@
                 background:#f9fdf4;
                 border-radius:8px;
                 border:1px solid #d0e4b8;
-            ">전국 자치단체 대상 공모 통해 16개 자치단체, 17개 사업 선정 (행정안전부 4.21.)<br><br>사회연대경제 혁신모델 발굴 및 확산 공모사업 추진, 최종 16개 자치단체 선정, 국비 85억원 투입 예정.<br><br>유형별 선정: 공공서비스 혁신형(아산시), 지역순환경제 구축형(대구시·광명시 등), 생활서비스 제공형(경기도·영암군), 지역활성화 선도형(인천 강화군·평창군 등 8개).<br><br>수원시, 사회연대경제 혁신모델을 추진할 수 있는 기본 생태계 이미 보유:<br>- 549개 사회적경제기업(사회적기업 83개, 협동조합 444개, 마을기업 10개, 자활기업 12개)<br>- 행궁동 &#x27;다시 행궁&#x27; 도시재생사업은 타 지역 벤치마킹 대상으로 성과 입증<br><br>수원시 특화 모델 방향:<br>① 행궁동 원도심+수원화성: 지역활성화 선도형 — 마을호텔·로컬브랜딩·빈집 활용 스테이<br>② 새빛돌봄 인프라: 생활서비스 제공형 — 돌봄·식사·이동·주거관리 통합 서비스<br>③ 549개 사회적경제기업 생태계: 지역순환경제 구축형 — 폐자원 수거·재제조·판매 순환경제<br>④ 팔달구·장안구 고령인구 밀집: 공공서비스 혁신형 — 식사+안부확인+건강 모니터링</div>
+            ">전국 자치단체 대상 공모 통해 16개 자치단체, 17개 사업 선정 (행정안전부 4.21.)<br><br>사회연대경제 혁신모델 발굴 및 확산 공모사업 추진 (공고 2.4.). 최종 16개 자치단체 선정, 국비 85억원 투입 예정.<br>- 추진배경: 정부나 민간의 개별노력으로 해결하기 어려운 복합적 지역사회문제 해결을 위해 사회연대의 중요성 부각 및 「사회연대경제기본법」 제정 예정(5월 중) 과 국정과제 이행 도모<br>- 신청/선정: 전국 33개 자치단체 신청 / 16개 자치단체 선정. 이중 10개 자치단체가 인구감소지역에 해당<br>- 재정지원: 선정 개소당 국비 5억원씩 3년간 지원, 총 85억원 투입 예정<br><br>유형별 선정 현황<br>- 공공서비스 혁신형: 아산시 — 로컬푸드 기반 어르신 통합급식·돌봄모델<br>- 지역순환경제 구축형: 대구시, 광명시, 대전 중구, 청주시, 제주시 — 건축 폐자재·폐플라스틱 순환 제조생태계 지역순환경제 모델<br>- 생활서비스 제공형: 경기도, 영암군 — 태양광 수익 기반 햇빛돌봄, 마을형 실버타운 '기찬 솔루션'<br>- 지역활성화 선도형: 인천 강화군, 평창군, 남원시, 김제시, 경주시, 영주시, 영천시, 밀양시, 제주시 — 마을호텔, 로컬브랜딩, 빈집 활용 스테이, 웰니스 경제권<br><br>수원시, 사회연대경제 혁신모델을 추진할 수 있는 기본 생태계 이미 보유<br>- 549개의 사회적 경제기업이 활동 중 (사회적기업 83개, 협동조합 444개, 마을기업 10개, 자활기업 12개, 2025년 6월 기준)<br>- 사회적경제지원센터를 통해 창업보육·판로지원 등 생태계 조성에 힘쓰고 있음<br>- 행궁동 일대의 '다시 행궁' 도시재생사업은 타 지역에서 벤치마킹 대상으로서 성과 입증<br>- 「사회연대경제기본법」 국회 통과 시 국가지원 체계 강화에 따라 선제적인 검토와 대응 필요<br><br>수원시 대응 방향<br>- 실태 파악: 사회적경제 조직 549개 중 사회연대경제 혁신모델 추진 역량이 있는 조직 우선 발굴<br>- 기획안 설계: 행궁동 도시재생사업 '다시 행궁'과 연계한 수원형 혁신모델 기획안을 2026년 하반기 중 마련<br>- 차기 공모 신청: 2027년 예상되는 2차 공모를 목표로 행안부 사회연대경제지원과와 사전 소통 개시<br><br>수원시 특화 사회연대경제 혁신모델 방향<br>① 행궁동 원도심+수원화성 → 지역활성화 선도형: 행궁동 원도심과 수원화성 도시재생 경험 결합, 체류형 로컬브랜딩 모델. '마을호텔' 개념을 주민·상인·사회적경제기업이 함께 운영하는 생활관광 플랫폼으로 확장. 빈집·유휴공간을 스테이·공방·로컬식당·야간관광·문화해설 거점으로 재편. 수익 일부는 골목환경 개선, 취약계층 일자리, 주민공동체 기금으로 환류<br>② 새빛돌봄 인프라+경기도 햇빛돌봄 → 생활서비스 제공형: 새빛돌봄 인프라 기반 돌봄·식사·이동·주거관리 서비스 통합 제공. 고령자·1인가구·장애인·돌봄공백 가구 대상 일상생활 지원서비스 패키지화. 사회적기업·마을기업·자활기업이 도시락·병원동행·청소·수리·안부확인·이동지원 등 분담. 동 단위 행정복지센터와 연계하여 공공복지 사각지대 보완<br>③ 549개 사회적경제기업 생태계 → 지역순환경제 구축형: 폐자원 수거·재제조·판매·교육 연계 순환경제 모델. 공동주택·공공기관·학교·전통시장 등에서 발생하는 폐플라스틱·폐현수막·폐목재·폐섬유 등 수거. 사회적경제기업이 업사이클 제품·공공조달 물품·지역기념품·교육키트 등으로 재가공. 수원시 공공구매와 연계하여 초기 판로 확보<br>④ 팔달구·장안구 고령인구 밀집 → 공공서비스 혁신형: 식사+안부확인+건강 모니터링 결합 공공서비스 혁신모델. 마을기업·자활기업·시니어클럽이 급식 조리·배송·배식 담당. 동 행정복지센터·보건소·지역사회보장협의체가 대상자 발굴·건강·복지 연계 담당. 단순 도시락 배달이 아닌 "식사 제공 + 안부확인 + 위기징후 발견 + 복지연계 체계"로 설계</div>
         </details>
 
         
@@ -372,13 +446,21 @@
         box-shadow:0 2px 8px rgba(59,109,17,0.06);
     ">
         <!-- Header -->
-        <div style="margin-bottom:16px;">
-            <div style="font-size:0.72rem;color:#777777;font-weight:600;
-                        letter-spacing:0.05em;margin-bottom:4px;">
-                WEEKLY 3
+        <div style="margin-bottom:16px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+            <div>
+                <div style="font-size:0.72rem;color:#777777;font-weight:600;
+                            letter-spacing:0.05em;margin-bottom:4px;">
+                    WEEKLY 3
+                </div>
+                <h2 style="margin:0;font-size:1.15rem;font-weight:700;
+                           color:#2a5009;line-height:1.4;">국가 재정교육 본격화와 수원시의 대응 방향</h2>
             </div>
-            <h2 style="margin:0;font-size:1.15rem;font-weight:700;
-                       color:#2a5009;line-height:1.4;">국가 재정교육 본격화와 수원시의 대응 방향</h2>
+            <button onclick="printArticle('article-3')"
+                    style="flex-shrink:0;padding:6px 14px;background:#3B6D11;color:#fff;
+                           border:none;border-radius:6px;font-size:0.78rem;font-weight:600;
+                           cursor:pointer;white-space:nowrap;"
+                    onmouseover="this.style.background='#2a5009'"
+                    onmouseout="this.style.background='#3B6D11'">다운로드</button>
         </div>
 
         <!-- Keywords -->
@@ -415,7 +497,7 @@
                 background:#f9fdf4;
                 border-radius:8px;
                 border:1px solid #d0e4b8;
-            ">일반 국민 재정교육 프로그램 공식 출범 (기획예산처+한국재정정보원 4.23.)<br><br>이재명 정부 출범 이후 재정 분야 국민 소통 강화 최초 정책 시도. 초등학생~일반국민·대학생까지 생애주기별 맞춤형 4개 프로그램 연중 운영 예정:<br>- 찾아가는 재정캠프(4~11월, 초등학생 4~6학년)<br>- 일반국민 이러닝 콘텐츠(6월, 열린재정 홈페이지)<br>- 재정교육 집중과정+경진대회(여름방학, 대학생)<br>- 재정교육 아이디어 공모전(연말, 숏폼·웹툰·카드뉴스)<br><br>수원시, &#x27;시민이 체감하는 지방재정 교육 프로그램&#x27; 운영 필요:<br>- 수원시 예산 2026년 기준 3조 5,190억원(경기도 31개 시·군 중 2위)<br>- 수원시는 1995년 전국 최초 주민참여예산제 도입 선도도시이나, 실제 참여 시민은 여전히 소수<br><br>수원형 재정교육 3대 트랙:<br>① 학교 연계 — &#x27;수원시 예산을 교실로&#x27;, 보드게임·스토리텔링 수업<br>② 일반시민 — 찾아가는 재정설명회, 이러닝 숏폼, 주민참여예산 연계 재정학교<br>③ 대학생 — 수원시 재정데이터 분석 경진대회, 지방재정 캡스톤 연계 과정</div>
+            ">일반 국민 재정교육 프로그램 공식 출범 (기획예산처+한국재정정보원 4.23.)<br><br>의의: 이재명 정부 출범 이후 재정 분야에서 국민 소통을 강화하는 최초의 정책 시도<br>- 그간 재정 교육은 기획예산처·행정안전부 등 공무원 직무교육에 집중, 일반 국민은 재정 정보에 접근하기 어렵다는 구조적 문제가 지속<br>- 핵심 재정 이슈가 사회적 갈등의 원인이 되는 상황에서, 국민이 나라 살림의 원리를 스스로 이해해야만 재정 국정과제 이행에 대한 사회적 수용성과 참여 역량을 높일 수 있다고 판단<br><br>4개 프로그램 (생애주기별 맞춤형, 연중 운영 예정)<br>- 4~11월 '찾아가는 재정캠프' (초등학생 4~6학년): 전문강사 학교 직접 방문, '우리 마을 만들기' 보드게임 + 이론수업 2차시. 1차 시행 대상: 부산 17개교 25학급, 광주 13개교 16학급<br>- 6월 '일반국민 이러닝 콘텐츠' (일반국민 전체): 열린재정 홈페이지(openfiscaldata.go.kr) 게시, 재정 역할·주요 사업 알기 쉽게 설명<br>- 여름방학 '재정교육 집중과정+경진대회' (대학생): 1박 2일 합숙 과정, 재정데이터 분석 경진대회, 정책대안 제안<br>- 연말 '재정교육 아이디어 공모전' (일반국민 전체): 숏폼·웹툰·카드뉴스 등 국민이 직접 재정교육 콘텐츠 제작<br><br>수원시, '시민이 체감하는 지방재정 교육 프로그램' 운영 필요<br>- 기획예산처가 '국가재정'을 다룬다면, 수원시는 시민 생활과 직접 연결되는 '지방재정 교육' 필요<br>- 수원시 예산은 2026년 기준 3조 5,190억원으로, 경기도 31개 시·군 중 두 번째로 크나, 다수 시민은 자신이 낸 지방세가 어떻게 쓰이는지 알지 못해 체감이 어려움<br>- 수원시는 1995년 전국 최초로 주민참여예산제를 도입한 선도 도시이나, 실제 주민참여예산에 참여하는 시민은 여전히 소수<br>- 지방재정교육은 납세자인 시민의 지방세 중요성 인식 및 지역경제 활성화 공감 향상에 기여<br><br>수원형 재정교육 3대 트랙<br><br>트랙 1. 학교 연계 — '수원시 예산을 교실로'<br>- 수원교육지원청의 '수원 지역교육과정 징검다리' 기존 협력 체계에 지방재정 교육 접목<br>- 추진 방식: 수원시 예산·세금 주제 교재 개발 → 사회과 연계 수업 또는 창의적 체험활동 활용<br>- 콘텐츠: '우리 동네 예산 만들기' 보드게임 수원시 버전 자체 개발, 새빛하우스·행궁동 도시재생 등 실제 시 사업을 소재로 한 스토리텔링 수업<br>- 기대 효과: 미래 납세자·유권자의 지방재정 이해도 제고, 주민참여예산 차세대 참여자 기반 형성<br><br>트랙 2. 일반시민 — 재정에 대한 올바른 이해와 시정에 대한 관심도 제고<br>- 방식①: 찾아가는 재정설명회 — 동 행정복지센터·주민자치회 정기회의 연계, 해당 동의 예산 집행 현황을 담당 공무원이 직접 설명<br>- 방식②: 수원시 재정 이러닝·숏폼 콘텐츠 — 수원시 공식 앱·홈페이지에 '우리 시 예산 이야기' 영상 시리즈 게시 (세금의 흐름·주요 사업비·채무 현황 등, 5분 내외)<br>- 방식③: 주민참여예산 연계 재정학교 — 주민참여예산 신청 전 지방재정 기초과정 이수 연계, 모든 시민이 참여할 수 있도록 재정교육 확대 운영<br>- 기대 효과: 시 재정정책에 대한 시민 수용성 제고, 예산 낭비 감시 역량 강화, 납세 의식 향상<br><br>트랙 3. 대학생 — 재정데이터를 분석하고 청년 맞춤형 정책 제안 유도<br>- 아주대학교·경기대학교·성균관대학교 등 다수 대학이 위치하는 수원시의 강점 활용<br>- 방식①: 수원시 재정데이터 분석 경진대회 — 공개 재정 데이터 활용 정책 아이디어 제안, 우수팀 시장 보고 기회 부여<br>- 방식②: 지방재정 캡스톤 연계 과정 — 대학 캡스톤디자인·현장실습 과목과 연계, 수원시 실제 재정 과제를 팀 프로젝트로 수행<br>- 기대 효과: 지역 대학생의 수원시 재정 관심도 제고, 지역 정착 유인 제공, 재정 감시 역량 강화<br><br>참고: 기획예산처 '어렵게 느껴졌던 국가재정, 쉽게 설명합니다' 일반국민 재정교육 프로그램 본격 가동 (2026.04.23.)</div>
         </details>
 
         
@@ -472,13 +554,21 @@
         box-shadow:0 2px 8px rgba(59,109,17,0.06);
     ">
         <!-- Header -->
-        <div style="margin-bottom:16px;">
-            <div style="font-size:0.72rem;color:#777777;font-weight:600;
-                        letter-spacing:0.05em;margin-bottom:4px;">
-                WEEKLY 4
+        <div style="margin-bottom:16px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+            <div>
+                <div style="font-size:0.72rem;color:#777777;font-weight:600;
+                            letter-spacing:0.05em;margin-bottom:4px;">
+                    WEEKLY 4
+                </div>
+                <h2 style="margin:0;font-size:1.15rem;font-weight:700;
+                           color:#2a5009;line-height:1.4;">수원시 공동주택 주차난 해소를 위한 AI 로봇주차 도입 검토</h2>
             </div>
-            <h2 style="margin:0;font-size:1.15rem;font-weight:700;
-                       color:#2a5009;line-height:1.4;">수원시 공동주택 주차난 해소를 위한 AI 로봇주차 도입 검토</h2>
+            <button onclick="printArticle('article-4')"
+                    style="flex-shrink:0;padding:6px 14px;background:#3B6D11;color:#fff;
+                           border:none;border-radius:6px;font-size:0.78rem;font-weight:600;
+                           cursor:pointer;white-space:nowrap;"
+                    onmouseover="this.style.background='#2a5009'"
+                    onmouseout="this.style.background='#3B6D11'">다운로드</button>
         </div>
 
         <!-- Keywords -->
@@ -515,7 +605,7 @@
                 background:#f9fdf4;
                 border-radius:8px;
                 border:1px solid #d0e4b8;
-            ">법 개정으로 공동주택에도 로봇주차 도입 가능 (관련법 개정 2026.1.30.)<br><br>기존에는 상업지역·준주거지역 내 소형주택에만 기계식주차장 설치 허용 → 이번 개정으로 일반 공동주택까지 확대.<br><br>로봇주차(Auto Valet Parking) 핵심:<br>- 운전자가 하차하면 AI 자율주행 로봇이 최적 경로 탐색 후 자동 주차<br>- 높이 99mm 초박형 로봇, 센서 기반 정밀 제어, 세단·SUV·밴 등 다차종 호환<br>- 공간효율성: 자주식 대비 30% 이상 공간 효율 증가, 주차 수용능력 25.7~48.3% 향상<br>- 비용절감: 기계식 대비 초기 설치비 약 20% 절감<br><br>수원시 공공주택 적용 시 효과:<br>- 10개 단지(32,895세대) 주차면수 부족률 평균 11.6%(5,561면 부족)<br>- 로봇주차 도입 시 최소 11,252면~최대 21,147면 추가 확보 가능<br>- 1면당 주차면적 64% 절감(23.1㎡ → 8.3㎡), 건설비 면당 1,000만원 절감<br><br>단계적 접근: 시범 도입 → 공공실증 → 제도화<br>- 주차 부족률 20% 이상 구축 공동주택 대상 시범도입<br>- 수원도시공사 운영 48개 공영주차장 연계 우선 적용<br>- 신규 분양 아파트 로봇주차 일정 비율 도입 제도화 검토</div>
+            ">법 개정으로 공동주택에도 로봇주차 도입 가능 (관련법 개정 2026.1.30.)<br><br>법령 개정 내용<br>- 기존: 상업지역·준주거지역 내 소형주택과 비주택 시설을 동일 건축물로 건축하는 경우에만 기계식주차장 설치 허용<br>- 개정: 오토발렛 주차장치를 설치한 기계식 주차장으로서 사업계획 승인권자가 주거환경에 지장이 없다고 인정하는 경우 → 일반 공동주택까지 확대 적용<br><br>로봇주차의 핵심은 '공간 효율'과 '비용 절감'<br>- 로봇주차 시스템(Auto Valet Parking): 운전자가 주차장 입구 승하차장에 차량을 세워두면, AI 자율주행 로봇이 차량을 들어올려 최적 경로를 탐색한 뒤 빈 공간에 자동으로 주차하는 방식<br>- 작동방식: 높이 약 99mm의 초박형 로봇이 센서 기반 정밀 제어로 차량을 수평·수직 이동. 중앙 관제 시스템이 실시간으로 빈 공간을 파악하고 최적 동선을 계산하여 로봇에 명령<br>- 다차종 호환: 세단, SUV, 밴 등 다양한 차종 수용 (최대 3톤), 전기차 무선충전 기능 연계 가능<br>- 공간효율성: 사람이 내리는 문 열림 공간과 통행 통로가 불필요 → 자주식 주차 대비 공간 효율 약 30% 이상 증가 → 주차 수용능력 25.7~48.3% 향상<br>- 비용절감: 기계식 주차장 대비 초기 설치비용 약 20% 절감 → 지하층 면적 축소로 건축비 절감<br><br>수원시 공동주택 적용 시 효과 분석 (10개 단지, 32,895세대)<br>- 추정 주차면수 부족률 평균 11.6% (5,561면 부족)<br>- 로봇주차 도입 시 최소 11,252면~최대 21,147면 추가 확보 가능<br>- 자주식 주차 1면(23.1㎡) 대비 로봇주차(8.3㎡): 64% 면적 절감, 건설비 면당 1,000만원 절감(28.6%)<br>- 10개 단지 대상 절감 면적 최대 472,454㎡, 건설비용 약 4,400억원 절감<br><br>주요 단지별 현황<br>- 수원아이파크시티: 6,786세대, 주차 9,443면, 부족률 7.2%, 736면 부족 (효율 개선 시 2,427~4,561면 추가)<br>- 수원역푸르지오자이: 4,086세대, 주차 5,518면, 부족률 10.0%, 611면 부족 (1,418~2,665면 추가)<br>- 영통포레파크원: 3,129세대, 주차 3,191면, 부족률 32.0%, 1,503면 부족 (820~1,541면 추가)<br>- 매탄현대힐스테이트: 2,328세대, 주차 2,794면, 부족률 20.0%, 698면 부족 (718~1,350면 추가)<br>- 매탄위브하늘채: 3,391세대, 주차 4,407면, 부족률 13.4%, 680면 부족 (1,133~2,129면 추가)<br>- 힐스테이트푸르지오수원: 2,586세대, 주차 3,621면, 부족률 6.7%, 258면 부족 (931~1,749면 추가)<br>- 매교역푸르지오뷰SK: 3,603세대, 주차 5,044면, 부족률 6.7%, 361면 부족 (1,296~2,436면 추가)<br>- 화서역파크푸르지오: 2,355세대, 주차 3,297면, 부족률 6.7%, 236면 부족 (847~1,592면 추가)<br>- 수원권선꿈에그린: 2,400세대, 주차 3,120면, 부족률 13.3%, 480면 부족 (802~1,507면 추가)<br>- 광교중흥 클래스S: 2,231세대, 주차 3,347면, 부족률 0.0% (860~1,617면 추가)<br><br>수원시, '시범 도입-공공실증-제도화'의 단계적 접근이 적절<br>- 단계적 도입: 주차장 부족률 20% 이상인 구축 공동주택을 대상으로 시범도입 추진. 실제 공간효율·주민수용성·유지관리 비용 검증<br>- 공영주차장 연계: 수원도시공사가 운영 중인 48개 공영주차장 중 구조적 전환이 가능한 시설에 우선 적용<br>- 신규 분양 시설 제도화: 일정 세대수 이상 신규 아파트에 로봇주차 또는 기계식 주차 설비 일정 비율 도입을 제도화 모색<br>- 전기차 충전 인프라 연계: 로봇주차로 절감된 지하 공간을 전기차 충전소·공유 모빌리티 허브 등으로 전환<br>- 재정 지원 방안: 용적률 인센티브, 주차장 설치 기준 완화, 설치비 보조금, 장기수선충당금 활용 허용 등 병행 검토<br><br>출처: 토지주택연구원 '오토발렛파킹 공동주택 적용방안 연구' (배연희 외, 2026)</div>
         </details>
 
         
@@ -548,13 +638,21 @@
         box-shadow:0 2px 8px rgba(59,109,17,0.06);
     ">
         <!-- Header -->
-        <div style="margin-bottom:16px;">
-            <div style="font-size:0.72rem;color:#777777;font-weight:600;
-                        letter-spacing:0.05em;margin-bottom:4px;">
-                WEEKLY 5
+        <div style="margin-bottom:16px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+            <div>
+                <div style="font-size:0.72rem;color:#777777;font-weight:600;
+                            letter-spacing:0.05em;margin-bottom:4px;">
+                    WEEKLY 5
+                </div>
+                <h2 style="margin:0;font-size:1.15rem;font-weight:700;
+                           color:#2a5009;line-height:1.4;">서울시 역세권 전략 전환과 수원시 복합개발 고도화 전략</h2>
             </div>
-            <h2 style="margin:0;font-size:1.15rem;font-weight:700;
-                       color:#2a5009;line-height:1.4;">서울시 역세권 전략 전환과 수원시 복합개발 고도화 전략</h2>
+            <button onclick="printArticle('article-5')"
+                    style="flex-shrink:0;padding:6px 14px;background:#3B6D11;color:#fff;
+                           border:none;border-radius:6px;font-size:0.78rem;font-weight:600;
+                           cursor:pointer;white-space:nowrap;"
+                    onmouseover="this.style.background='#2a5009'"
+                    onmouseout="this.style.background='#3B6D11'">다운로드</button>
         </div>
 
         <!-- Keywords -->
@@ -591,7 +689,7 @@
                 background:#f9fdf4;
                 border-radius:8px;
                 border:1px solid #d0e4b8;
-            ">서울시, 개별 역세권 개발에서 &#x27;전면 확대·사업성 강화&#x27; 전략으로 전환<br><br>서울시 역세권을 단순 교통 결절점에서 생활 거점으로 전환하는 「역세권 직·주·락 활성화 전략」 본격 추진:<br>- 기존 153개 중심지 → 325개 전 역세권으로 확대, 향후 5년간 100개소 우선 개발<br>- 비강남권 11개 자치구: 공공기여 비율 용적률 기준 50% → 30% 완화<br>- 전 역세권 대상 용적률 상향, 비주거 의무 비율 폐지, 층수 제한 완화<br><br>서울시의 핵심 변화 — 역세권 복합개발의 &#x27;네트워크화&#x27;:<br>① 고밀: 환승역 반경 500m 이내 용적률 최대 1,300%, 향후 5년간 35개소 신규 지정<br>② 속도: 인허가 절차 간소화로 5개월 이상 단축, 역세권 장기전세주택 21.2만호 확대<br>③ 확산: 역세권·간선도로 개발 축 확장 — 향후 5년간 60개소 추가 개발<br><br>수원시, &#x27;마련된 제도 기반 → 정교화 단계&#x27;로 넘어갈 때:<br>- 기초지자체 최초 22개 전철역 콤팩트시티 계획 추진, 9개 전략지구 선정<br>- 과제①: 공공기여 기준 역세권 유형·입지 여건 반영한 차등 구조로 고도화<br>- 과제②: 22개 역세권 기능 위계에 따른 공간구조 재편 전략<br>- 과제③: GTX-C·KTX 개통으로 광역교통 허브 부상하는 수원역 중심 선택과 집중</div>
+            ">서울시, 개별 역세권 개발에서 '전면 확대·사업성 강화' 전략으로 전환<br><br>서울시 역세권을 단순 교통 결절점에서 생활 거점으로 전환하는 「역세권 직·주·락 활성화 전략」 본격 추진<br>- 도시화 면적의 약 36%, 하루 약 1천만 명이 이용하는 역세권을 일자리·주거·여가 결합 생활 거점으로 재편<br>- 기존 153개 중심지 → 325개 전 역세권으로 개발 대상 확대, 향후 5년간 100개소 우선 개발<br>- 사업성이 낮아 개발이 정체된 동북·서북·서남권 등 비강남권 11개 자치구에 한해 공공기여 비율(용적률 기준) 50% → 30%로 완화하여 민간 참여 유도<br>- 전 역세권 대상으로 용적률 상향, 비주거 의무 비율 폐지, 층수 제한 완화 등 규제 개선 병행<br><br>2021년 이후 153개 역세권 중심지 복합개발 실적<br>- 업무시설 약 53만㎡, 상업시설 약 56만㎡ 등 비주거 기능 대폭 확충 → 일자리 기반 강화<br>- 장기전세주택 약 9.6만 호 공급 → 청년·신혼부부 대상 주거 안정 기반 확대<br>- 청년창업공간·키즈카페·산후조리원 등 생활밀착형 SOC 확충 → 생활거점 기능 강화<br><br>서울시 핵심 변화 — 역세권 복합개발의 '네트워크화'<br>① 고밀: 환승역 중심 초고밀 복합개발<br>- 환승역 반경 500m 이내 용적률 최대 1,300% 적용<br>- 향후 5년간 35개소 신규 지정, 업무·상업·주거·문화 기능이 결합된 대규모 거점 조성<br>② 속도: 주거 공급 확대 및 인허가 단축<br>- 인허가 절차 간소화로 사업 기간을 5개월 이상 단축<br>- 역세권 장기전세주택 366개소·21.2만 호까지 확대<br>③ 확산: 역세권→간선도로로 개발 축 확장<br>- 역과 역 사이 폭 35m 이상 주요 간선도로를 대상으로 '성장 잠재권 활성화 사업' 신규 도입<br>- 용도지역 상향(최대 일반상업지역) + 공공기여 활용하여 향후 5년간 60개소 추가 개발 예정<br><br>수원시, '마련된 제도 기반 → 정교화 단계'로 넘어갈 때<br>- 기초지자체 최초로 22개 전철역을 중심으로 한 콤팩트시티 계획 추진<br>- 3가지 유형(도심복합형·일자리형·생활밀착형)으로 기능 분화, 9개 전략지구 선정·사업 추진 중<br>- 조례 제정과 전략지구 선정 등 사업 기반은 갖췄으나, 공공기여 세부 기준과 거점 간 연계 전략 정립 필요<br><br>과제①: 공공기여 기준 — 역세권 유형·입지 여건 반영한 차등 구조로 고도화<br>- 수원시는 토지 면적 가치 15% 기부채납, 3단계 용적률 상향 구조 등 독자적 제도 설계 기준 마련<br>- 다만 전 역세권에 일률적 기준을 적용하고 있어, 역세권 유형·사업성 차이 등을 반영한 세분화된 제도 설계가 다음 과제<br><br>과제②: 22개 역세권을 기능 위계에 따라 연계하는 공간구조 재편 전략<br>- 도심복합형·일자리형·생활밀착형 유형 체계는 마련되어 있으나, 유형 간 연계 및 역할 분담 기준 필요<br>- 역세권 기본계획을 통해 22개 역세권의 기능 배분과 위계 구조를 명시적으로 설정하여 개별 역 단위 사업으로의 분절 방지 필요<br><br>과제③: 수원역 등 환승거점 중심의 선택과 집중<br>- GTX-C·KTX 개통으로 수원역이 광역교통 허브로 부상하는 여건 형성<br>- 수원역 등 핵심 환승거점을 선도사업지로 우선 지정, 사업 실현 가능성을 선제적으로 입증하는 전략 필요<br>- 향후 점(역세권) → 선(철도·간선도로 축) → 면(생활권) 단계적 공간 확장 전략 필요<br><br>보도자료: 서울시 '325개 역세권 복합개발 대상지로 서울시 이동중심 생활거점 개발 본격화' (서울시, 2026.3.25.)<br>수원시: '수원형 역세권 복합개발 활성화사업 추진' (수원시, 2025.9.17.)</div>
         </details>
 
         
